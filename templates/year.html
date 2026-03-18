@@ -1,0 +1,333 @@
+{% extends 'base.html' %} {% block content %}
+<div
+  class="mb-10 flex flex-col items-center justify-center animate-fade-in relative"
+>
+  <a
+    href="{{ url_for('bookshelf') }}"
+    class="absolute left-0 top-1/2 -translate-y-1/2 text-pastel-darkbrown hover:text-pastel-darkpink transition-colors w-10 h-10 flex items-center justify-center bg-white/50 rounded-full shadow-sm"
+  >
+    <i class="fa-solid fa-arrow-left"></i>
+  </a>
+  <h1
+    class="text-4xl md:text-5xl font-display font-bold text-gray-800 drop-shadow-sm"
+  >
+    {{ year }} Memories 📸
+  </h1>
+  <p class="text-gray-500 font-medium mt-2">
+    A beautiful year, month by month.
+  </p>
+</div>
+
+<!-- Grid of 12 Months -->
+<div
+  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-slide-up"
+>
+  {% for month_num, month_name in months %}
+  <div
+    class="bg-white/80 backdrop-blur-md rounded-[2rem] p-5 shadow-lg border border-white/50 hover:shadow-xl transition-all duration-300 group flex flex-col h-full relative overflow-hidden"
+  >
+    <!-- Month Header -->
+    <div
+      class="text-center border-b border-pastel-pink/50 pb-3 mb-4 relative z-10"
+    >
+      <h2 class="text-2xl font-display font-bold text-pastel-darkbrown">
+        {{ month_name }}
+      </h2>
+      <p class="text-xs text-gray-400 font-medium tracking-wide">
+        {{ images_by_month[month_num]|length }} memories
+      </p>
+    </div>
+
+    <!-- Image Gallery (Tiny thumbnails) -->
+    <div class="flex-grow flex flex-col">
+      {% if images_by_month[month_num] %}
+      <div class="grid grid-cols-2 gap-2 mb-4 relative z-10">
+        <!-- Show max 4 preview images -->
+        {% for img in images_by_month[month_num][:4] %}
+        <div
+          class="aspect-square rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-shadow relative"
+        >
+          <img
+            src="{{ url_for('static', filename='uploads/' + img.filename) }}"
+            alt="Memory"
+            class="w-full h-full object-cover hover:scale-110 transition-transform duration-500 cursor-pointer"
+            onclick="openImageModal(this.src)"
+          />
+          <!-- Overlay if more than 4 images (on the 4th thumbnail) -->
+          {% if loop.index == 4 and images_by_month[month_num]|length > 4 %}
+          <div
+            class="absolute inset-0 bg-black/40 flex items-center justify-center text-white font-bold backdrop-blur-[2px] cursor-pointer"
+            onclick="openMonthModal({{ month_num }})"
+          >
+            +{{ images_by_month[month_num]|length - 3 }}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if images_by_month[month_num]|length > 4 %}
+      <button
+        onclick="openMonthModal({{ month_num }})"
+        class="mt-auto text-xs text-center text-pastel-darkpink font-semibold hover:underline relative z-10"
+      >
+        View All {{ month_name }} Memories ->
+      </button>
+      {% else %}
+      <div class="mt-auto"></div>
+      {% endif %} {% else %}
+      <!-- Empty State -->
+      <div
+        class="flex-grow flex flex-col items-center justify-center text-gray-400 opacity-60 relative z-10 min-h-[120px]"
+      >
+        <i class="fa-regular fa-image text-3xl mb-2"></i>
+        <p class="text-sm font-medium">No pages yet...</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Upload Button -->
+    <div
+      class="mt-4 pt-3 border-t border-gray-100 flex justify-center relative z-10"
+    >
+      <button
+        type="button"
+        onclick="openUploadModal({{ month_num }}, '{{ month_name }}')"
+        class="bg-pastel-cream text-pastel-darkbrown hover:bg-pastel-pink hover:text-pastel-darkpink w-full py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 shadow-sm"
+      >
+        <i class="fa-solid fa-plus"></i> Add Memory
+      </button>
+    </div>
+
+    <!-- Decorative subtle background flower/star -->
+    <i
+      class="fa-solid fa-sparkles absolute -bottom-4 -right-2 text-6xl text-pastel-pink/20 -rotate-12 pointer-events-none group-hover:scale-110 transition-transform duration-500"
+    ></i>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Upload Modal -->
+<div
+  id="upload-modal"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+>
+  <div
+    class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"
+    onclick="closeUploadModal()"
+  ></div>
+  <div
+    class="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl animate-fade-in-up"
+  >
+    <button
+      onclick="closeUploadModal()"
+      class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+    >
+      <i class="fa-solid fa-xmark text-xl"></i>
+    </button>
+
+    <div class="text-center mb-6">
+      <div
+        class="inline-flex justify-center items-center w-16 h-16 bg-pastel-lavender/40 rounded-full mb-3 shadow-inner"
+      >
+        <i class="fa-solid fa-camera-retro text-2xl text-purple-500"></i>
+      </div>
+      <h3
+        class="text-2xl font-display font-bold text-gray-800"
+        id="upload-modal-title"
+      >
+        Upload Photo
+      </h3>
+      <p class="text-sm text-gray-500 mt-1">
+        Add a new page to your memory book!
+      </p>
+    </div>
+
+    <form
+      action="{{ url_for('upload') }}"
+      method="POST"
+      enctype="multipart/form-data"
+      class="space-y-4"
+    >
+      <input type="hidden" name="year" value="{{ year }}" />
+      <input type="hidden" name="month" id="upload-month-input" value="" />
+
+      <div class="relative group cursor-pointer">
+        <input
+          type="file"
+          name="file"
+          id="file-upload"
+          accept="image/*"
+          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+          required
+          onchange="previewFile()"
+        />
+        <div
+          class="w-full h-32 border-2 border-dashed border-pastel-pink rounded-2xl flex flex-col items-center justify-center bg-pastel-cream/30 group-hover:bg-pastel-pink/20 transition-colors relative overflow-hidden"
+        >
+          <div
+            id="upload-placeholder"
+            class="text-center pointer-events-none p-4"
+          >
+            <i
+              class="fa-solid fa-cloud-arrow-up text-3xl text-pastel-darkpink mb-2"
+            ></i>
+            <span class="block text-sm font-semibold text-pastel-darkbrown"
+              >Click to select an image</span
+            >
+            <span class="block text-xs text-gray-400 mt-1"
+              >JPG, PNG, GIF (Max 5MB)</span
+            >
+          </div>
+          <img
+            id="image-preview"
+            class="hidden absolute inset-0 w-full h-full object-cover z-10"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-gradient-to-r from-pastel-pink to-pastel-darkpink hover:from-pastel-darkpink hover:to-pink-400 text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 mt-2"
+      >
+        Save Memory ✨
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Full Image View Modal -->
+<div
+  id="image-modal"
+  class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4"
+>
+  <div
+    class="absolute inset-0 bg-black/80 backdrop-blur-md"
+    onclick="closeImageModal()"
+  ></div>
+  <div class="relative z-10 max-w-4xl max-h-[90vh] flex flex-col items-center">
+    <button
+      onclick="closeImageModal()"
+      class="absolute -top-10 right-0 text-white/80 hover:text-white transition-colors"
+    >
+      <i class="fa-solid fa-xmark text-3xl drop-shadow-md"></i>
+    </button>
+    <img
+      id="full-image-view"
+      src=""
+      alt="Memory Full"
+      class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain animate-scale-up border-4 border-white"
+    />
+  </div>
+</div>
+
+<!-- All Month Images Modal (Hidden logic handles rendering all images for a month) -->
+{% for month_num, _ in months %} {% if images_by_month[month_num]|length > 4 %}
+<div
+  id="month-modal-{{ month_num }}"
+  class="hidden fixed inset-0 z-50 flex flex-col p-4 md:p-10"
+>
+  <div
+    class="absolute inset-0 bg-gray-900/80 backdrop-blur-md"
+    onclick="closeMonthModal({{ month_num }})"
+  ></div>
+
+  <div
+    class="relative z-10 bg-pastel-cream w-full h-full max-w-6xl mx-auto rounded-[2rem] shadow-2xl flex flex-col overflow-hidden animate-slide-up border-4 border-white"
+  >
+    <div
+      class="flex justify-between items-center p-6 border-b border-pastel-pink/30 bg-white/60"
+    >
+      <h3 class="text-3xl font-display font-bold text-gray-800">
+        {{ year }} - Month {{ month_num }}
+      </h3>
+      <button
+        onclick="closeMonthModal({{ month_num }})"
+        class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-gray-500 hover:text-pastel-darkpink hover:shadow-md transition-all"
+      >
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+    </div>
+
+    <div class="flex-grow overflow-y-auto p-6 md:p-8 custom-scrollbar">
+      <div
+        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
+      >
+        {% for img in images_by_month[month_num] %}
+        <div
+          class="aspect-square rounded-2xl overflow-hidden shadow-md group cursor-pointer"
+          onclick="openImageModal(this.querySelector('img').src)"
+        >
+          <img
+            src="{{ url_for('static', filename='uploads/' + img.filename) }}"
+            alt="Memory"
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% endfor %}
+
+<script>
+  function openUploadModal(monthNum, monthName) {
+    document.getElementById("upload-month-input").value = monthNum;
+    document.getElementById("upload-modal-title").innerText =
+      "Upload for " + monthName;
+    document.getElementById("upload-modal").classList.remove("hidden");
+
+    // Reset preview
+    document.getElementById("file-upload").value = "";
+    document.getElementById("image-preview").classList.add("hidden");
+    document.getElementById("upload-placeholder").classList.remove("hidden");
+  }
+
+  function closeUploadModal() {
+    document.getElementById("upload-modal").classList.add("hidden");
+  }
+
+  function previewFile() {
+    const file = document.getElementById("file-upload").files[0];
+    const preview = document.getElementById("image-preview");
+    const placeholder = document.getElementById("upload-placeholder");
+    const reader = new FileReader();
+
+    reader.addEventListener(
+      "load",
+      function () {
+        preview.src = reader.result;
+        preview.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+      },
+      false,
+    );
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function openImageModal(src) {
+    document.getElementById("full-image-view").src = src;
+    document.getElementById("image-modal").classList.remove("hidden");
+  }
+
+  function closeImageModal() {
+    document.getElementById("image-modal").classList.add("hidden");
+  }
+
+  function openMonthModal(monthNum) {
+    document
+      .getElementById("month-modal-" + monthNum)
+      .classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMonthModal(monthNum) {
+    document.getElementById("month-modal-" + monthNum).classList.add("hidden");
+    document.body.style.overflow = "auto";
+  }
+</script>
+{% endblock %}

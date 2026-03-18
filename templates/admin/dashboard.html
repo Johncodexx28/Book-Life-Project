@@ -1,0 +1,60 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header_title %}Overview{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Total Users Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex items-start gap-4 transition-transform hover:-translate-y-1 duration-300 relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center text-xl shrink-0 z-10">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div class="z-10 relative">
+            <p class="text-sm font-medium text-slate-500 mb-1">Total Users</p>
+            <h3 class="text-3xl font-bold text-slate-800">{{ total_users }}</h3>
+        </div>
+    </div>
+
+    <!-- Total Memories Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex items-start gap-4 transition-transform hover:-translate-y-1 duration-300 relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl shrink-0 z-10">
+            <i class="fa-solid fa-image"></i>
+        </div>
+        <div class="z-10 relative">
+            <p class="text-sm font-medium text-slate-500 mb-1">Total Memories</p>
+            <h3 class="text-3xl font-bold text-slate-800">{{ total_memories }}</h3>
+        </div>
+    </div>
+
+    <!-- Storage Used Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex items-start gap-4 transition-transform hover:-translate-y-1 duration-300 relative overflow-hidden group">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0 z-10">
+            <i class="fa-solid fa-hard-drive"></i>
+        </div>
+        <div class="z-10 relative">
+            <p class="text-sm font-medium text-slate-500 mb-1">Storage Used</p>
+            <h3 class="text-3xl font-bold text-slate-800">{{ total_storage_size }}</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Welcome Section -->
+<div class="bg-gradient-to-br from-primary-50 to-purple-50 rounded-3xl p-8 mb-8 relative overflow-hidden flex items-center justify-between border border-white">
+    <div class="absolute top-0 left-0 w-full h-full bg-white/40 mix-blend-overlay"></div>
+    <div class="relative z-10 max-w-xl">
+        <h2 class="text-2xl font-bold text-slate-800 mb-2">Welcome to the Admin Dashboard! ✨</h2>
+        <p class="text-slate-600">
+            Here you can monitor the health of Memory Shelf, manage user accounts, 
+            and keep track of the storage used by uploading memories. Use the sidebar to navigate.
+        </p>
+    </div>
+    <div class="hidden md:flex relative z-10 w-32 h-32 items-center justify-center opacity-80">
+        <i class="fa-solid fa-books text-6xl text-primary-400 mix-blend-multiply"></i>
+        <!-- Some simple sparkly CSS elements could go here -->
+    </div>
+</div>
+{% endblock %}

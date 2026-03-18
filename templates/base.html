@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Shelf 🎀</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Custom CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <!-- Setup Tailwind config for custom pastel colors -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              pastel: {
+                pink: "#FFE5EC",
+                darkpink: "#FFB3C6",
+                cream: "#FFF1E6",
+                lavender: "#E5E0FF",
+                brown: "#D4A373",
+                darkbrown: "#A68A64",
+                sage: "#CCD5AE",
+              },
+            },
+            fontFamily: {
+              sans: ["Outfit", "sans-serif"],
+              display: ["Quicksand", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-gradient-to-br from-pastel-cream to-pastel-pink min-h-screen text-gray-700 relative overflow-x-hidden font-sans antialiased transition-all duration-500 selection:bg-pastel-darkpink selection:text-white"
+  >
+    <!-- Sparkles Container -->
+    <div
+      id="sparkles-container"
+      class="fixed inset-0 pointer-events-none z-0"
+    ></div>
+
+    <!-- Navigation Bar -->
+    <nav class="w-full p-4 relative z-10">
+      <div
+        class="max-w-6xl mx-auto flex justify-between items-center bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-white/50 px-6 py-3"
+      >
+        <a
+          href="{{ url_for('bookshelf') }}"
+          class="text-xl font-display font-bold text-pastel-darkbrown hover:text-pastel-darkpink transition-colors flex items-center gap-2"
+        >
+          <i class="fa-solid fa-book-open text-pastel-darkpink"></i>
+          Memory Shelf
+        </a>
+
+        {% if current_user.is_authenticated %}
+        <div class="flex items-center gap-4">
+          <span
+            class="text-sm font-medium text-gray-500 hidden sm:inline-block"
+          >
+            {{ current_user.email }}
+          </span>
+          <a
+            href="{{ url_for('logout') }}"
+            class="bg-pastel-darkpink/20 hover:bg-pastel-darkpink/40 text-pastel-darkbrown px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md"
+          >
+            Logout <i class="fa-solid fa-arrow-right-from-bracket ml-1"></i>
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div
+      class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4"
+    >
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="flash-message mb-3 p-4 rounded-xl shadow-lg border backdrop-blur-md {% if category == 'success' %} bg-green-50/90 border-green-200 text-green-700 {% elif category == 'danger' %} bg-red-50/90 border-red-200 text-red-700 {% else %} bg-blue-50/90 border-blue-200 text-blue-700 {% endif %} flex items-center gap-3"
+      >
+        <i
+          class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %} text-lg"
+        ></i>
+        <span class="font-medium">{{ message }}</span>
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main
+      class="relative z-10 w-full max-w-6xl mx-auto px-4 py-8 page-transition"
+    >
+      {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/sparkles.js') }}"></script>
+    <script>
+      // Auto-hide flash messages after 4 seconds
+      setTimeout(() => {
+        const flashes = document.querySelectorAll(".flash-message");
+        flashes.forEach((f) => {
+          f.style.opacity = "0";
+          setTimeout(() => f.remove(), 500);
+        });
+      }, 4000);
+    </script>
+  </body>
+</html>

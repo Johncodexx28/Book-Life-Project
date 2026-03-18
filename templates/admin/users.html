@@ -1,0 +1,99 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Manage Users{% endblock %}
+{% block header_title %}Users Community{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <!-- Table Header Toolbar -->
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <h3 class="font-semibold text-slate-700">Registered Accounts</h3>
+        <span class="text-sm text-slate-500">{{ users|length }} total</span>
+    </div>
+
+    <!-- Responsive Table Container -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
+                    <th class="px-6 py-4 font-medium border-b border-slate-100">User</th>
+                    <th class="px-6 py-4 font-medium border-b border-slate-100">Joined</th>
+                    <th class="px-6 py-4 font-medium border-b border-slate-100">Role</th>
+                    <th class="px-6 py-4 font-medium border-b border-slate-100 text-center">Memories</th>
+                    <th class="px-6 py-4 font-medium border-b border-slate-100 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for user in users %}
+                <tr class="hover:bg-slate-50/50 transition-colors duration-200">
+                    <!-- User Info Column -->
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm
+                                {% if user.is_admin %} bg-primary-100 text-primary-600 
+                                {% else %} bg-slate-100 text-slate-600 {% endif %}">
+                                {{ user.email[0]|upper }}
+                            </div>
+                            <div>
+                                <p class="font-medium text-slate-800">{{ user.email }}</p>
+                                <p class="text-xs text-slate-400">ID: {{ user.id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    
+                    <!-- Joined Column -->
+                    <td class="px-6 py-4 text-slate-600 text-sm">
+                        {{ user.created_at.strftime('%b %d, %Y') if user.created_at else 'Unknown' }}
+                    </td>
+                    
+                    <!-- Role Column -->
+                    <td class="px-6 py-4">
+                        {% if user.is_admin %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-700 border border-primary-100">
+                                <i class="fa-solid fa-shield-halved text-[10px]"></i> Admin
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                                User
+                            </span>
+                        {% endif %}
+                    </td>
+                    
+                    <!-- Memories Column -->
+                    <td class="px-6 py-4 text-center">
+                        <div class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 font-semibold text-sm">
+                            {{ user.images|length }}
+                        </div>
+                    </td>
+                    
+                    <!-- Actions Column -->
+                    <td class="px-6 py-4 text-right">
+                        {% if user.id != current_user.id %}
+                        <!-- Delete Form -->
+                        <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete {{ user.email }}? This will permanently delete all of their uploaded images and cannot be undone.');">
+                            <button type="submit" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors duration-200 group" title="Delete User">
+                                <i class="fa-regular fa-trash-can group-hover:scale-110 transition-transform"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-xs text-slate-400 italic px-2">Current User (You)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
+                                <i class="fa-solid fa-users-slash text-2xl text-slate-300"></i>
+                            </div>
+                            <p>No users found in the database.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
