@@ -1,99 +1,179 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}Manage Users{% endblock %}
-{% block header_title %}Users Community{% endblock %}
+{% block title %}User Archives{% endblock %}
 
 {% block content %}
-<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-    <!-- Table Header Toolbar -->
-    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-        <h3 class="font-semibold text-slate-700">Registered Accounts</h3>
-        <span class="text-sm text-slate-500">{{ users|length }} total</span>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+    <div>
+        <h1 class="text-4xl font-serif font-bold text-brand-text mb-2">User Archives</h1>
+        <p class="text-gray-500 text-sm max-w-lg">Oversee the digital lineage and memory vaults of all registered Curators.</p>
+    </div>
+    <div class="flex gap-3">
+        <button class="bg-[#dcd9d2] text-brand-text px-4 py-2.5 rounded text-xs font-bold tracking-wide flex items-center gap-2 hover:bg-gray-300 transition-colors shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+            Filters
+        </button>
+        <button class="bg-brand-green text-white px-4 py-2.5 rounded text-xs font-bold tracking-wide flex items-center gap-2 hover:bg-opacity-90 transition-colors shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+            Invite Curator
+        </button>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <div class="bg-brand-panel p-6 rounded-md border-l-4 border-brand-green shadow-soft">
+        <p class="text-[11px] font-bold tracking-widest text-gray-500 uppercase mb-2">Total Curators</p>
+        <div class="text-4xl font-serif text-brand-text">{{ users|length }}</div>
+        <p class="text-[10px] text-gray-500 mt-3 font-medium flex items-center gap-1">
+            <svg class="w-3 h-3 text-brand-text" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+            100% active retention
+        </p>
     </div>
 
-    <!-- Responsive Table Container -->
+    {% set total_mems = namespace(count=0) %}
+    {% for u in users %}
+        {% set total_mems.count = total_mems.count + u.images|length %}
+    {% endfor %}
+    <div class="bg-brand-panel p-6 rounded-md border-l-4 border-brand-brown shadow-soft">
+        <p class="text-[11px] font-bold tracking-widest text-gray-500 uppercase mb-2">Active Vaults</p>
+        <div class="text-4xl font-serif text-brand-text">{{ total_mems.count }}</div>
+        <p class="text-[10px] text-brand-brown mt-3 font-bold flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Artifacts Preserved
+        </p>
+    </div>
+
+    <div class="bg-brand-panel p-6 rounded-md border-l-4 border-brand-blue shadow-soft">
+        <p class="text-[11px] font-bold tracking-widest text-gray-500 uppercase mb-2">System Roles</p>
+        <div class="text-4xl font-serif text-brand-text">
+            {{ users|selectattr('is_admin', 'equalto', true)|list|length }}
+        </div>
+        <p class="text-[10px] text-gray-500 mt-3 font-medium flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+            Administrative Librarians
+        </p>
+    </div>
+</div>
+
+<div class="bg-brand-panel rounded-md shadow-soft border border-white/40 overflow-hidden">
+    
+    <div class="p-4 border-b border-[#dcd9d2] flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/30">
+        <div class="relative w-full sm:w-auto">
+            <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" placeholder="Filter by name or archive ID..." class="bg-white border border-[#dcd9d2] rounded text-sm px-9 py-2 w-full sm:w-80 focus:outline-none focus:border-brand-green focus:ring-1 focus:ring-brand-green placeholder-gray-400">
+        </div>
+        <div class="flex gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest w-full sm:w-auto">
+            <div class="flex items-center gap-1 cursor-pointer">STATUS: <span class="text-brand-text border-b border-brand-text pb-0.5 ml-1">All Statuses</span> <svg class="w-3 h-3 text-brand-text ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+            <div class="flex items-center gap-1 cursor-pointer">SORT: <span class="text-brand-text border-b border-brand-text pb-0.5 ml-1">Recent Activity</span> <svg class="w-3 h-3 text-brand-text ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+        </div>
+    </div>
+
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
+        <table class="w-full text-left border-collapse min-w-[800px]">
             <thead>
-                <tr class="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
-                    <th class="px-6 py-4 font-medium border-b border-slate-100">User</th>
-                    <th class="px-6 py-4 font-medium border-b border-slate-100">Joined</th>
-                    <th class="px-6 py-4 font-medium border-b border-slate-100">Role</th>
-                    <th class="px-6 py-4 font-medium border-b border-slate-100 text-center">Memories</th>
-                    <th class="px-6 py-4 font-medium border-b border-slate-100 text-right">Actions</th>
+                <tr class="text-[10px] uppercase tracking-widest text-gray-500 border-b border-[#dcd9d2] bg-white/20">
+                    <th class="px-6 py-4 font-bold">Curator Name</th>
+                    <th class="px-6 py-4 font-bold">Archive Status</th>
+                    <th class="px-6 py-4 font-bold">Storage Used</th>
+                    <th class="px-6 py-4 font-bold">Last Activity</th>
+                    <th class="px-6 py-4 font-bold text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-[#dcd9d2]/50">
                 {% for user in users %}
-                <tr class="hover:bg-slate-50/50 transition-colors duration-200">
-                    <!-- User Info Column -->
+                <tr class="hover:bg-white/40 transition-colors">
+                    
                     <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm
-                                {% if user.is_admin %} bg-primary-100 text-primary-600 
-                                {% else %} bg-slate-100 text-slate-600 {% endif %}">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded overflow-hidden shadow-sm shrink-0 border border-black/5 flex items-center justify-center font-serif text-lg font-bold text-white {% if user.is_admin %}bg-brand-brown{% else %}bg-brand-blue{% endif %}">
                                 {{ user.email[0]|upper }}
                             </div>
                             <div>
-                                <p class="font-medium text-slate-800">{{ user.email }}</p>
-                                <p class="text-xs text-slate-400">ID: {{ user.id }}</p>
+                                <p class="text-sm font-bold text-brand-text leading-tight mb-0.5">{{ user.email.split('@')[0]|replace('.', ' ')|title }}</p>
+                                <p class="text-xs text-gray-500">{{ user.email }}</p>
                             </div>
                         </div>
                     </td>
-                    
-                    <!-- Joined Column -->
-                    <td class="px-6 py-4 text-slate-600 text-sm">
-                        {{ user.created_at.strftime('%b %d, %Y') if user.created_at else 'Unknown' }}
-                    </td>
-                    
-                    <!-- Role Column -->
+
                     <td class="px-6 py-4">
                         {% if user.is_admin %}
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-700 border border-primary-100">
-                                <i class="fa-solid fa-shield-halved text-[10px]"></i> Admin
+                            <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-[#d6e3db] text-brand-green text-[9px] font-bold tracking-widest uppercase rounded">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span> Admin
                             </span>
                         {% else %}
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                            <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-[#e2dfd8] text-gray-600 text-[9px] font-bold tracking-widest uppercase rounded">
                                 User
                             </span>
                         {% endif %}
                     </td>
-                    
-                    <!-- Memories Column -->
-                    <td class="px-6 py-4 text-center">
-                        <div class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 font-semibold text-sm">
-                            {{ user.images|length }}
+
+                    <td class="px-6 py-4">
+                        <div class="flex items-end gap-1 mb-1.5">
+                            <span class="text-[13px] font-bold text-brand-text leading-none">{{ user.images|length }} Items</span>
+                            <span class="text-[10px] text-gray-400 font-medium">/ ∞ Limit</span>
+                        </div>
+                        <div class="h-1 w-32 bg-[#dcd9d2] rounded-full overflow-hidden">
+                            {% set bar_width = [user.images|length * 2, 100]|min %}
+                            <div class="h-full bg-brand-text" {{ ('style="width: ' ~ bar_width ~ '%;"') | safe }}></div>
                         </div>
                     </td>
-                    
-                    <!-- Actions Column -->
+
+                    <td class="px-6 py-4">
+                        <p class="text-sm text-brand-text font-medium">{{ user.created_at.strftime('%b %d, %Y') if user.created_at else 'Unknown' }}</p>
+                        <p class="text-[11px] text-gray-500">Account Induction</p>
+                    </td>
+
                     <td class="px-6 py-4 text-right">
-                        {% if user.id != current_user.id %}
-                        <!-- Delete Form -->
-                        <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete {{ user.email }}? This will permanently delete all of their uploaded images and cannot be undone.');">
-                            <button type="submit" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors duration-200 group" title="Delete User">
-                                <i class="fa-regular fa-trash-can group-hover:scale-110 transition-transform"></i>
-                            </button>
-                        </form>
-                        {% else %}
-                        <span class="text-xs text-slate-400 italic px-2">Current User (You)</span>
-                        {% endif %}
+                        <div class="flex justify-end gap-3 items-center">
+                            <a href="{{ url_for('admin_edit_user', user_id=user.id) }}" class="text-gray-400 hover:text-brand-text transition-colors" title="View & Edit Curator">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+</a>
+
+                            {% if user.id != current_user.id %}
+                                <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" class="inline-block" onsubmit="return confirm('Initiate archival purge for {{ user.email }}? This permanently destroys all associated data and cannot be undone.');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="text-gray-400 hover:text-brand-red transition-colors" title="Delete User">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest px-1">Curator (You)</span>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" class="px-6 py-12 text-center text-slate-500">
-                        <div class="flex flex-col items-center justify-center">
-                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                                <i class="fa-solid fa-users-slash text-2xl text-slate-300"></i>
-                            </div>
-                            <p>No users found in the database.</p>
-                        </div>
+                    <td colspan="5" class="px-6 py-16 text-center">
+                        <svg class="w-8 h-8 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <p class="text-sm font-bold text-gray-500 uppercase tracking-widest">No Archival Records Found</p>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <div class="px-6 py-4 border-t border-[#dcd9d2] flex justify-between items-center bg-[#e8e6e1]/50">
+        <p class="text-xs text-gray-500 font-medium">Showing <span class="font-bold text-brand-text">{{ users|length }}</span> of <span class="font-bold text-brand-text">{{ users|length }}</span> archivists</p>
+        
+        <div class="flex items-center gap-1 text-xs font-bold text-gray-500">
+            <button class="w-6 h-6 flex items-center justify-center hover:text-brand-text transition-colors">&lt;</button>
+            <button class="w-6 h-6 rounded-full bg-brand-green text-white flex items-center justify-center shadow-sm">1</button>
+            <button class="w-6 h-6 flex items-center justify-center hover:text-brand-text transition-colors opacity-50 cursor-not-allowed">2</button>
+            <button class="w-6 h-6 flex items-center justify-center hover:text-brand-text transition-colors opacity-50 cursor-not-allowed">&gt;</button>
+        </div>
+    </div>
 </div>
+
+<div class="mt-8 flex justify-between items-center text-[9px] font-bold tracking-widest uppercase text-gray-400 pb-4">
+    <div class="flex gap-6">
+        <span>Protocol V4.2.0</span>
+        <span class="text-brand-text">System Status: Nominal</span>
+    </div>
+    <div class="font-serif italic capitalize normal-case text-gray-500 tracking-normal text-[13px] hidden md:block">
+        "Every memory preserved is a bridge to tomorrow."
+    </div>
+</div>
+
 {% endblock %}

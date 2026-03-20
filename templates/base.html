@@ -3,116 +3,118 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Memory Shelf 🎀</title>
-    <!-- Tailwind CSS -->
+    <title>The Living Library</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <!-- Custom CSS -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/styles.css') }}"
-    />
-    <!-- Setup Tailwind config for custom pastel colors -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
     <script>
       tailwind.config = {
         theme: {
           extend: {
-            colors: {
-              pastel: {
-                pink: "#FFE5EC",
-                darkpink: "#FFB3C6",
-                cream: "#FFF1E6",
-                lavender: "#E5E0FF",
-                brown: "#D4A373",
-                darkbrown: "#A68A64",
-                sage: "#CCD5AE",
-              },
-            },
             fontFamily: {
-              sans: ["Outfit", "sans-serif"],
-              display: ["Quicksand", "sans-serif"],
+              serif: ['"Playfair Display"', 'serif'],
+              sans: ['"Inter"', 'sans-serif'],
             },
-          },
-        },
-      };
+            colors: {
+              brand: {
+                bg: '#e8e6e1',
+                text: '#2c2c2c',
+                green: '#4a5b52',
+                brown: '#786154',
+                blue: '#5c7385',
+                card: '#daddd8',
+                accent: '#ebe8e2'
+              }
+            }
+          }
+        }
+      }
     </script>
+    <style>
+        /* Smooth transitions for links and buttons */
+        a, button { transition: all 0.2s ease-in-out; }
+        
+        /* Custom scrollbar hiding for the bookshelf */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
   </head>
-  <body
-    class="bg-gradient-to-br from-pastel-cream to-pastel-pink min-h-screen text-gray-700 relative overflow-x-hidden font-sans antialiased transition-all duration-500 selection:bg-pastel-darkpink selection:text-white"
-  >
-    <!-- Sparkles Container -->
-    <div
-      id="sparkles-container"
-      class="fixed inset-0 pointer-events-none z-0"
-    ></div>
+  <body class="bg-brand-bg text-brand-text font-sans antialiased min-h-screen flex flex-col selection:bg-brand-green selection:text-white">
 
-    <!-- Navigation Bar -->
-    <nav class="w-full p-4 relative z-10">
-      <div
-        class="max-w-6xl mx-auto flex justify-between items-center bg-white/60 backdrop-blur-md rounded-2xl shadow-sm border border-white/50 px-6 py-3"
-      >
-        <a
-          href="{{ url_for('bookshelf') }}"
-          class="text-xl font-display font-bold text-pastel-darkbrown hover:text-pastel-darkpink transition-colors flex items-center gap-2"
-        >
-          <i class="fa-solid fa-book-open text-pastel-darkpink"></i>
-          Memory Shelf
+    <nav class="w-full relative z-50">
+      <div class="max-w-6xl mx-auto flex justify-between items-center px-6 py-8">
+        
+        <a href="/" class="text-xl font-serif font-bold tracking-wide text-brand-text hover:opacity-70">
+          The Living Library
         </a>
 
-        {% if current_user.is_authenticated %}
-        <div class="flex items-center gap-4">
-          <span
-            class="text-sm font-medium text-gray-500 hidden sm:inline-block"
-          >
-            {{ current_user.email }}
-          </span>
-          <a
-            href="{{ url_for('logout') }}"
-            class="bg-pastel-darkpink/20 hover:bg-pastel-darkpink/40 text-pastel-darkbrown px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md"
-          >
-            Logout <i class="fa-solid fa-arrow-right-from-bracket ml-1"></i>
-          </a>
+        <div class="hidden md:flex space-x-10 text-[13px] font-medium text-gray-500 tracking-wide">
+          <a href="{{ url_for('bookshelf') if current_user.is_authenticated else '#' }}" class="hover:text-brand-text">Library</a>
+          <a href="#" class="hover:text-brand-text">Months</a>
+          <a href="#" class="hover:text-brand-text">Vault</a>
         </div>
-        {% endif %}
+
+        <div class="flex items-center space-x-5 text-gray-500">
+          {% if current_user.is_authenticated %}
+            <button class="hover:text-brand-text transition-colors">
+                <svg class="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+            </button>
+            
+            <a href="{{ url_for('logout') }}" title="Logout" class="hover:text-brand-text transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </a>
+          {% else %}
+            <a href="{{ url_for('login') }}" class="text-sm font-medium hover:text-brand-text">Sign In</a>
+          {% endif %}
+        </div>
+        
       </div>
     </nav>
 
-    <!-- Flash Messages -->
-    <div
-      class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4"
-    >
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %}
-      <div
-        class="flash-message mb-3 p-4 rounded-xl shadow-lg border backdrop-blur-md {% if category == 'success' %} bg-green-50/90 border-green-200 text-green-700 {% elif category == 'danger' %} bg-red-50/90 border-red-200 text-red-700 {% else %} bg-blue-50/90 border-blue-200 text-blue-700 {% endif %} flex items-center gap-3"
-      >
-        <i
-          class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %} text-lg"
-        ></i>
-        <span class="font-medium">{{ message }}</span>
-      </div>
-      {% endfor %} {% endif %} {% endwith %}
+    <div class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4 pointer-events-none">
+      {% with messages = get_flashed_messages(with_categories=true) %} 
+        {% if messages %} 
+          {% for category, message in messages %}
+            <div class="flash-message pointer-events-auto mb-3 p-4 rounded-md shadow-lg border backdrop-blur-md text-sm font-medium flex items-center gap-3 transition-opacity duration-500
+              {% if category == 'success' %} bg-white/90 border-[#4a5b52]/20 text-[#4a5b52] 
+              {% elif category == 'danger' %} bg-white/90 border-red-900/20 text-red-900 
+              {% else %} bg-white/90 border-[#5c7385]/20 text-[#5c7385] {% endif %}">
+              
+              <i class="fa-solid {% if category == 'success' %}fa-check{% elif category == 'danger' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} text-[12px]"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %} 
+        {% endif %} 
+      {% endwith %}
     </div>
 
-    <!-- Main Content -->
-    <main
-      class="relative z-10 w-full max-w-6xl mx-auto px-4 py-8 page-transition"
-    >
+    <main class="flex-grow w-full">
       {% block content %}{% endblock %}
     </main>
 
-    <script src="{{ url_for('static', filename='js/sparkles.js') }}"></script>
+    {% block footer %}
+    <footer class="bg-[#dcd9d2] py-12 mt-auto border-t border-[#d5d2cc]">
+        <div class="container mx-auto px-6 flex flex-col items-center">
+            <div class="text-lg font-serif font-semibold tracking-wide mb-6 text-brand-text opacity-90">The Living Library</div>
+            <div class="flex space-x-6 text-xs text-gray-600 mb-6 font-medium">
+                <a href="#" class="hover:text-brand-text transition-colors">Help</a>
+                <a href="#" class="hover:text-brand-text transition-colors">About</a>
+                <a href="#" class="hover:text-brand-text transition-colors">Privacy</a>
+            </div>
+            <div class="text-[10px] text-gray-500 font-medium tracking-wide">
+                &copy; 2024 The Living Library Archival System
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
     <script>
-      // Auto-hide flash messages after 4 seconds
       setTimeout(() => {
         const flashes = document.querySelectorAll(".flash-message");
         flashes.forEach((f) => {
