@@ -3,184 +3,192 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Admin Dashboard{% endblock %} - Memory Shelf</title>
-    <!-- Tailwind CSS -->
+    <title>{% block title %}Curator Console{% endblock %} - The Living Library</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <!-- Google Fonts -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ["Poppins", "sans-serif"],
+              serif: ['"Playfair Display"', 'serif'],
+              sans: ['"Inter"', 'sans-serif'],
             },
             colors: {
-              primary: {
-                50: "#fdf2f8",
-                100: "#fce7f3",
-                200: "#fbcfe8",
-                300: "#f9a8d4",
-                400: "#f472b6",
-                500: "#ec4899",
-                600: "#db2777",
-                700: "#be185d",
-                800: "#9d174d",
-                900: "#831843",
-              },
+              brand: {
+                bg: '#e8e6e1',
+                panel: '#f4f2ee',
+                text: '#2c2c2c',
+                green: '#4a5b52',
+                lightGreen: '#7a8c7b',
+                brown: '#786154',
+                lightBrown: '#a68a64',
+                blue: '#5c7385',
+                red: '#8b3a3a',
+                border: '#dcd9d2'
+              }
             },
+            boxShadow: {
+              'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+            }
           },
         },
       };
     </script>
     <style>
       body {
-        background-color: #f8fafc;
-        /* Soft sparkling background effect */
-        background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-        background-size: 30px 30px;
+        background-color: #e8e6e1;
+      }
+      /* Custom thin scrollbar for a cleaner look */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #dcd9d2;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #a68a64;
       }
     </style>
   </head>
-  <body class="text-slate-800 flex h-screen overflow-hidden">
-    <!-- Sidebar -->
-    <aside
-      class="w-64 bg-white shadow-xl flex flex-col h-full border-r border-slate-100 relative z-20"
-    >
-      <!-- Logo Area -->
-      <div
-        class="p-6 flex items-center justify-center border-b border-primary-50"
-      >
-        <h1 class="text-2xl font-bold text-primary-600 flex items-center gap-2">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> Admin
-        </h1>
+  
+  <body class="text-brand-text font-sans flex h-screen overflow-hidden antialiased">
+    
+    <aside class="w-64 bg-brand-bg flex flex-col h-full border-r border-brand-border shrink-0">
+      
+      <div class="p-8 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-brand-green rounded-md flex items-center justify-center text-white shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
+          </div>
+          <div>
+            <h1 class="text-base font-serif font-bold leading-tight">Curator Console</h1>
+            <p class="text-[10px] uppercase tracking-widest text-gray-500 font-semibold">Administrative Vault</p>
+          </div>
+        </div>
       </div>
 
-      <!-- Navigation Links -->
-      <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-        <a
-          href="{{ url_for('admin_dashboard') }}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {{ 'bg-primary-50 text-primary-700 font-medium' if request.endpoint == 'admin_dashboard' else 'text-slate-500 hover:bg-slate-50 hover:text-slate-700' }}"
-        >
-          <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+      <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <a href="{{ url_for('admin_dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors text-sm font-medium {{ 'bg-brand-border/50 text-brand-text border-l-2 border-brand-brown' if request.endpoint == 'admin_dashboard' else 'text-gray-600 hover:bg-brand-border/30 border-l-2 border-transparent' }}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
           Dashboard
         </a>
 
-        <a
-          href="{{ url_for('admin_users') }}"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {{ 'bg-primary-50 text-primary-700 font-medium' if request.endpoint == 'admin_users' else 'text-slate-500 hover:bg-slate-50 hover:text-slate-700' }}"
-        >
-          <i class="fa-solid fa-users w-5 text-center"></i>
-          Manage Users
+        <a href="{{ url_for('admin_users') }}" class="flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors text-sm font-medium {{ 'bg-brand-border/50 text-brand-text border-l-2 border-brand-brown' if request.endpoint == 'admin_users' else 'text-gray-600 hover:bg-brand-border/30 border-l-2 border-transparent' }}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          User Archives
         </a>
 
-        <div class="pt-4 mt-4 border-t border-slate-100">
-          <p
-            class="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2"
-          >
-            Main Site
-          </p>
-          <a
-            href="{{ url_for('home') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-          >
-            <i class="fa-solid fa-house w-5 text-center"></i>
-            Back to Shelf
-          </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors text-sm font-medium text-gray-600 hover:bg-brand-border/30 border-l-2 border-transparent">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+          Storage Metrics
+        </a>
 
-          <a
-            href="{{ url_for('logout') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-rose-500 hover:bg-rose-50 mt-2"
-          >
-            <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i>
-            Logout
-          </a>
+        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors text-sm font-medium text-gray-600 hover:bg-brand-border/30 border-l-2 border-transparent">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          System Logs
+        </a>
+
+        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-md transition-colors text-sm font-medium text-gray-600 hover:bg-brand-border/30 border-l-2 border-transparent">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          Heirloom Settings
+        </a>
+
+        <div class="pt-6 px-4">
+            <button class="w-full bg-brand-green text-white text-xs font-semibold tracking-wider uppercase py-3 rounded shadow-sm hover:bg-opacity-90 transition-colors">
+                Generate Report
+            </button>
         </div>
       </nav>
 
-      <!-- User Badge -->
-      <div class="p-4 border-t border-slate-100 bg-slate-50">
-        <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-bold"
-          >
-            {{ current_user.email[0]|upper }}
-          </div>
-          <div class="overflow-hidden">
-            <p class="text-sm font-medium text-slate-700 truncate">
-              {{ current_user.email }}
-            </p>
-            <p class="text-xs text-primary-500 font-medium">Administrator</p>
-          </div>
-        </div>
+      <div class="p-6 space-y-3">
+        <a href="{{ url_for('home') }}" class="flex items-center gap-3 text-sm font-medium text-gray-600 hover:text-brand-text transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          Support
+        </a>
+        <a href="{{ url_for('logout') }}" class="flex items-center gap-3 text-sm font-medium text-gray-600 hover:text-brand-text transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          Sign Out
+        </a>
       </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col h-full overflow-hidden relative z-10">
-      <!-- Header / Flash Messages -->
-      <header
-        class="bg-white/80 backdrop-blur-md border-b border-slate-100 py-4 px-8 flex justify-between items-center sticky top-0 z-30"
-      >
-        <div>
-          <h2 class="text-xl font-semibold text-slate-800">
-            {% block header_title %}Overview{% endblock %}
-          </h2>
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-brand-bg relative">
+      
+      <header class="h-20 px-10 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-8">
+            <h2 class="text-xl font-serif italic text-brand-text opacity-90">The Living Library</h2>
+            <div class="relative hidden md:block">
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" placeholder="Search archives..." class="bg-brand-border/40 text-brand-text px-10 py-2 rounded-md text-sm outline-none w-64 focus:bg-white transition-colors placeholder-gray-500" />
+            </div>
         </div>
 
-        <!-- Dynamic Flash Messages -->
-        <div class="flex-1 ml-8 flex justify-end max-w-lg">
-          {% with messages = get_flashed_messages(with_categories=true) %} {% if
-          messages %} {% for category, message in messages %}
-          <div
-            class="animate-bounce-short px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm {% if category == 'success' %}bg-green-50 text-green-700 border border-green-200 {% elif category == 'danger' or category == 'error' %}bg-rose-50 text-rose-700 border border-rose-200 {% elif category == 'warning' %}bg-amber-50 text-amber-700 border border-amber-200 {% else %}bg-blue-50 text-blue-700 border border-blue-200{% endif %}"
-          >
-            {% if category == 'success' %}<i
-              class="fa-solid fa-check-circle"
-            ></i>
-            {% elif category == 'danger' or category == 'error' %}<i
-              class="fa-solid fa-triangle-exclamation"
-            ></i>
-            {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %} {{
-            message }}
-          </div>
-          {% endfor %} {% endif %} {% endwith %}
+        <div class="flex items-center gap-6">
+            <button class="text-gray-500 hover:text-brand-text transition-colors relative">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+                <span class="absolute top-0 right-0 w-2 h-2 bg-brand-red rounded-full border border-brand-bg"></span>
+            </button>
+            <div class="flex items-center gap-3 border-l border-brand-border pl-6">
+                <div class="text-right">
+                    <p class="text-xs font-bold text-brand-text">{{ current_user.email.split('@')[0]|capitalize }}</p>
+                    <p class="text-[9px] uppercase tracking-widest text-gray-500 font-semibold">Senior Librarian</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-brand-brown text-white flex items-center justify-center text-sm font-bold">
+                    {{ current_user.email[0]|upper }}
+                </div>
+            </div>
         </div>
       </header>
 
-      <!-- Scrollable Content -->
-      <div class="flex-1 overflow-y-auto p-8">
-        <div class="max-w-6xl mx-auto">{% block content %}{% endblock %}</div>
+      <div id="toast-container" class="fixed top-24 right-10 z-[100] flex flex-col gap-3 items-end pointer-events-none">
+        {% with messages = get_flashed_messages(with_categories=true) %} 
+            {% if messages %} 
+                {% for category, message in messages %}
+                <div class="toast-message pointer-events-auto min-w-[300px] max-w-sm px-5 py-4 rounded-md shadow-lg text-sm font-medium flex items-start gap-3 border-l-4 transition-all duration-500 translate-x-0 opacity-100 
+                    {% if category == 'success' %}bg-white border-brand-green text-brand-green 
+                    {% elif category == 'danger' or category == 'error' %}bg-[#f9ecec] border-brand-red text-brand-red 
+                    {% else %}bg-white border-brand-blue text-brand-blue{% endif %}">
+                    
+                    <i class="fa-solid {% if category == 'success' %}fa-check-circle{% elif category == 'danger' or category == 'error' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %} mt-0.5"></i> 
+                    <span class="flex-1 leading-snug">{{ message }}</span>
+                    <button onclick="this.parentElement.style.opacity='0'; setTimeout(() => this.parentElement.remove(), 500);" class="text-gray-400 hover:text-gray-700 transition-colors ml-4">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                {% endfor %} 
+            {% endif %} 
+        {% endwith %}
       </div>
+
+      <div class="flex-1 overflow-y-auto px-10 pb-10">
+        <div class="max-w-7xl mx-auto">
+            {% block content %}{% endblock %}
+        </div>
+      </div>
+      
     </main>
 
-    <style>
-      @keyframes bounce-short {
-        0%,
-        20%,
-        50%,
-        80%,
-        100% {
-          transform: translateY(0);
-        }
-        40% {
-          transform: translateY(-5px);
-        }
-        60% {
-          transform: translateY(-3px);
-        }
-      }
-      .animate-bounce-short {
-        animation: bounce-short 1s ease;
-      }
-    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          const toasts = document.querySelectorAll('.toast-message');
+          toasts.forEach(toast => {
+              // Wait 4 seconds, then fade it out
+              setTimeout(() => {
+                  toast.style.opacity = '0';
+                  toast.style.transform = 'translateX(20px)'; // subtle slide out to the right
+                  
+                  // Remove from HTML completely after animation finishes
+                  setTimeout(() => toast.remove(), 500); 
+              }, 4000); 
+          });
+      });
+    </script>
   </body>
 </html>

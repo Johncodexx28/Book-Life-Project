@@ -1,0 +1,86 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Edit Curator{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+    
+    <div class="mb-8 flex items-center gap-4">
+        <a href="{{ url_for('admin_users') }}" class="w-10 h-10 bg-white rounded border border-[#dcd9d2] flex items-center justify-center text-gray-400 hover:text-brand-text hover:border-brand-text transition-colors shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        </a>
+        <div>
+            <h1 class="text-3xl font-serif font-bold text-brand-text leading-tight">Curator Profile: {{ user.email.split('@')[0]|title }}</h1>
+            <p class="text-xs text-gray-500 font-medium">Modify credentials and view system access levels.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="space-y-6">
+            <div class="bg-white border border-[#dcd9d2] rounded-md p-6 shadow-sm relative overflow-hidden">
+                <svg class="absolute -right-4 -bottom-4 w-24 h-24 text-brand-bg opacity-50 pointer-events-none" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
+                
+                <h3 class="text-[11px] font-bold tracking-widest text-brand-text uppercase mb-4 border-b border-[#dcd9d2] pb-2">System Records</h3>
+                
+                <div class="space-y-5 relative z-10">
+                    <div>
+                        <span class="block text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Archive ID</span>
+                        <span class="text-sm font-medium text-brand-text">ARCH-{{ "%04d" | format(user.id) }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Induction Date</span>
+                        <span class="text-sm font-medium text-brand-text">{{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'Unknown' }}</span>
+                    </div>
+                    <div>
+                        <span class="block text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Vault Contents</span>
+                        <span class="text-sm font-medium text-brand-text">{{ user.images|length }} artifacts secured</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 bg-brand-panel p-8 rounded-md shadow-soft border-t-4 border-brand-brown">
+            <form method="POST" action="" class="space-y-6">
+                
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div>
+                    <label class="block text-[11px] font-bold tracking-widest text-gray-500 uppercase mb-2">Registered Email</label>
+                    <div class="relative">
+                        <svg class="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        <input type="email" name="email" value="{{ user.email }}" required class="w-full pl-11 pr-4 py-3 rounded-md bg-white border border-[#dcd9d2] focus:border-brand-brown focus:ring-1 focus:ring-brand-brown outline-none text-brand-text font-medium shadow-sm transition-colors" />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold tracking-widest text-gray-500 uppercase mb-2">System Privileges</label>
+                    <div class="flex items-start gap-4 bg-white p-5 border border-[#dcd9d2] rounded-md shadow-sm">
+                        <div class="pt-0.5">
+                            <input type="checkbox" name="is_admin" id="is_admin" class="w-5 h-5 text-brand-brown bg-gray-100 border-gray-300 rounded focus:ring-brand-brown cursor-pointer" 
+                                {% if user.is_admin %}checked{% endif %} 
+                                {% if user.id == current_user.id %}disabled title="You cannot alter your own admin privileges."{% endif %}>
+                        </div>
+                        <label for="is_admin" class="cursor-pointer flex-1">
+                            <span class="text-sm font-bold text-brand-text block">Administrative Librarian</span>
+                            <span class="block text-xs text-gray-500 font-medium mt-1 leading-relaxed">Checking this box grants the user full access to the Curator Console, allowing them to view system metrics and manage other users.</span>
+                        </label>
+                    </div>
+                    {% if user.id == current_user.id %}
+                        <p class="text-[10px] font-bold text-brand-red mt-2 tracking-wide uppercase"><i class="fa-solid fa-lock mr-1"></i> Self-editing of admin rights is disabled.</p>
+                    {% endif %}
+                </div>
+
+                <div class="pt-6 mt-6 border-t border-[#dcd9d2] flex justify-end gap-3">
+                    <a href="{{ url_for('admin_users') }}" class="px-5 py-2.5 rounded-md text-sm font-bold tracking-wide text-gray-600 hover:bg-gray-200 transition-colors">Cancel</a>
+                    <button type="submit" class="bg-brand-brown hover:bg-opacity-90 text-white px-6 py-2.5 rounded-md text-sm font-bold tracking-wide transition-colors shadow-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Save Changes
+                    </button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

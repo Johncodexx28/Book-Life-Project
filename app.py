@@ -11,11 +11,17 @@ from functools import wraps
 import re
 import click
 
+# --- NEW SECURITY IMPORTS ---
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret-key')
+
+# Secure Secret Key
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///book_life.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -24,7 +30,6 @@ UPLOAD_FOLDER = os.path.join('static', 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Ensure upload directory exists
 os.makedirs(os.path.join(app.root_path, app.config['UPLOAD_FOLDER']), exist_ok=True)
 
 # Initialize extensions
@@ -34,15 +39,37 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
+# --- SECURITY INITIALIZATION ---
+csrf = CSRFProtect(app)
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Utility function to check allowed file extensions
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# --- UPGRADED FILE VALIDATION ---
+def allowed_file(file_stream, filename):
+    if not ('.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS):
+        return False
+        
+    header = file_stream.read(512)
+    file_stream.seek(0)
+    
+    ext = filename.rsplit('.', 1)[1].lower()
+    if ext in ['jpg', 'jpeg']:
+        return header.startswith(b'\xff\xd8')
+    elif ext == 'png':
+        return header.startswith(b'\x89PNG\r\n\x1a\n')
+    elif ext == 'gif':
+        return header.startswith(b'GIF87a') or header.startswith(b'GIF89a')
+    
+    return False
 
-# Utility function for admin check
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -56,21 +83,19 @@ def admin_required(f):
 
 @app.route('/')
 def home():
-    if current_user.is_authenticated:
-        return redirect(url_for('bookshelf'))
-    return redirect(url_for('login'))
+    # We removed the redirect so everyone (logged in or out) sees the landing page
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('bookshelf'))
         
     if request.method == 'POST':
-       
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
         
-      
         if not email or len(email) > 120 or not re.match(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$", email):
             flash('Invalid email format provided.', 'danger')
             return render_template('login.html')
@@ -91,17 +116,16 @@ def login():
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('bookshelf'))
         
     if request.method == 'POST':
-     
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
         
-       
         if not email or len(email) > 120 or not re.match(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$", email):
             flash('Invalid email format provided.', 'danger')
             return render_template('register.html')
@@ -135,14 +159,12 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/bookshelf')
+@app.route('/library')
 @login_required
 def bookshelf():
-    
     years = db.session.query(MemoryImage.year).filter_by(user_id=current_user.id).distinct().all()
     years = [y[0] for y in years]
     
-   
     if not years:
         years = [datetime.now().year]
         
@@ -158,10 +180,8 @@ def year_view(year):
         (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
     ]
     
-   
     images = MemoryImage.query.filter_by(user_id=current_user.id, year=year).all()
     
-   
     images_by_month = {month_num: [] for month_num, _ in months}
     for img in images:
         if img.month in images_by_month:
@@ -188,20 +208,20 @@ def upload():
         flash('No selected file', 'danger')
         return redirect(url_for('year_view', year=year))
         
-    if file and allowed_file(file.filename):
+    if file and allowed_file(file.stream, file.filename):
         filename = secure_filename(f"{current_user.id}_{year}_{month}_{int(datetime.now().timestamp())}_{file.filename}")
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(os.path.join(app.root_path, file_path))
         
-        # Save to database
         new_image = MemoryImage(user_id=current_user.id, year=year, month=month, filename=filename)
         db.session.add(new_image)
         db.session.commit()
         
         flash('Memory added successfully! ✨', 'success')
+    else:
+        flash('Invalid file type detected. Only real images are allowed.', 'danger')
         
     return redirect(url_for('year_view', year=year))
-
 
 @app.route('/admin')
 @login_required
@@ -210,7 +230,6 @@ def admin_dashboard():
     total_users = User.query.count()
     total_memories = MemoryImage.query.count()
     
-    # Calculate total storage used in the uploads folder
     total_storage_bytes = 0
     upload_path = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'])
     if os.path.exists(upload_path):
@@ -219,7 +238,6 @@ def admin_dashboard():
             if os.path.isfile(file_path):
                 total_storage_bytes += os.path.getsize(file_path)
     
-    # Convert bytes to human-readable format
     for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
         if total_storage_bytes < 1024.0:
             total_storage_size = f"{total_storage_bytes:.1f} {x}"
@@ -235,8 +253,41 @@ def admin_dashboard():
 @admin_required
 def admin_users():
     users = User.query.order_by(User.created_at.desc()).all()
-    # Need to pass memory count per user or calculate it in the template
     return render_template('admin/users.html', users=users)
+
+
+@app.route('/admin/users/<int:user_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+    
+    if request.method == 'POST':
+        new_email = request.form.get('email', '').strip()
+        # Checkbox returns 'on' if checked, otherwise None
+        is_admin = request.form.get('is_admin') == 'on'
+        
+        # 1. Update Email (if changed)
+        if new_email and new_email != user.email:
+            existing_user = User.query.filter_by(email=new_email).first()
+            if existing_user:
+                flash('Email address is already in use by another account.', 'danger')
+                return render_template('admin/edit_user.html', user=user)
+            user.email = new_email
+            
+        # 2. Update Admin Status (Prevent admins from accidentally demoting themselves)
+        if user.id != current_user.id:
+            user.is_admin = is_admin
+            
+        db.session.commit()
+        flash(f'Curator record for {user.email} updated successfully.', 'success')
+        return redirect(url_for('admin_users'))
+        
+    return render_template('admin/edit_user.html', user=user)
+
+
+
+
 
 @app.route('/admin/users/<int:user_id>/delete', methods=['POST'])
 @login_required
@@ -248,7 +299,6 @@ def admin_delete_user(user_id):
         
     user = User.query.get_or_404(user_id)
     
-    # Delete all associated images from the filesystem
     for image in user.images:
         file_path = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], image.filename)
         if os.path.exists(file_path):
@@ -257,10 +307,7 @@ def admin_delete_user(user_id):
             except Exception as e:
                 print(f"Error deleting file {file_path}: {e}")
                 
-    # The associated MemoryImages should ideally be cascaded or deleted here. 
-    # Since we didn't specify cascade="all, delete-orphan", we must delete them manually:
     MemoryImage.query.filter_by(user_id=user.id).delete()
-    
     db.session.delete(user)
     db.session.commit()
     
@@ -275,17 +322,14 @@ def init_db():
 @app.cli.command("upgrade-db")
 def upgrade_db():
     import sqlite3
-    db_path = os.path.join(os.path.dirname(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')), 'book_life.db') # basic extraction for sqlite filepath
-    # Assuming relative path from the root
+    db_path = os.path.join(os.path.dirname(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')), 'book_life.db') 
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite:///'):
         db_path = app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')
-        if db_path.startswith('/'): # absolute
-            pass
-        else: # relative
+        if not db_path.startswith('/'): 
            db_path = os.path.join(app.root_path, db_path)
 
     try:
-        conn = sqlite3.connect('instance/book_life.db') # Assuming standard Flask-SQLAlchemy instance folder
+        conn = sqlite3.connect('instance/book_life.db') 
         cursor = conn.cursor()
         cursor.execute("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0;")
         conn.commit()
@@ -297,7 +341,6 @@ def upgrade_db():
 @app.cli.command("make-admin")
 @click.argument("email")
 def make_admin(email):
-    # This needs to run in the app context, which CLI commands do by default
     user = User.query.filter_by(email=email).first()
     if user:
         user.is_admin = True
